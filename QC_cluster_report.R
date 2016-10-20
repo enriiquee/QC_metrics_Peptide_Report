@@ -15,7 +15,7 @@ library("data.table"); library("dplyr"); library("ggplot2"); library("stringr");
 library(knitr); library("reshape2")
 #Upload files using getwd
 pride_cluster_peptides_ALL_version1  <- read.delim(file.path(getwd(),"pride_cluster_peptides_Human.tsv"), comment.char="#")
-pride_cluster_peptides_ALL_version2 <- read.delim(file.path(getwd(),"pride_cluster_peptides_Human.tsv"), comment.char="#")
+pride_cluster_peptides_ALL_version2 <- read.delim(file.path(getwd(),"pride_cluster_peptides_Human2.tsv"), comment.char="#")
 
 #Split of the column in PEP and CPE
 new_data_frame_PEP_v1 = subset(pride_cluster_peptides_ALL_version1, PEH == 'PEP')
