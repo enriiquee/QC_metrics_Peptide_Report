@@ -3,6 +3,10 @@ title: "**QC metrics Peptide Reports**"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: html_document
 ---
+```{r}
+ Sys.setenv(RSTUDIO_PANDOC="C:/Program Files/RStudio/bin/pandoc")
+
+``` 
 
 ```{r}
 # PRIDE Cluster clusters all MS/MS spectra submitted to PRIDE Archive repository release: 2015-04
@@ -18,19 +22,19 @@ output: html_document
 ```{r, include=FALSE}
 # Upload packages
 
-packages <- c("data.table", "dplyr", "ggplot2", "stringr", "knitr", "markdown", "tidyr", "reshape2", "pander")
+packages <- c("data.table", "dplyr", "ggplot2", "stringr", "knitr", "markdown", "tidyr", "reshape2")
 if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
     install.packages(setdiff(packages, rownames(installed.packages())))  }
  
 library("data.table"); library("dplyr"); library("ggplot2"); library("stringr"); 
-library("knitr"); library("markdown"); library("tidyr"); library("reshape2"); library("pander")
+library("knitr"); library("markdown"); library("tidyr"); library("reshape2")
 
 ```
 
 ```{r, include=FALSE}
 #Upload files using getwd
 pride_cluster_peptides_ALL_version1  <- read.delim(file.path(getwd(),"pride_cluster_peptides_Human.tsv"), comment.char="#")
-pride_cluster_peptides_ALL_version2 <- read.delim(file.path(getwd(),"pride_cluster_peptides_Human.tsv"), comment.char="#")
+pride_cluster_peptides_ALL_version2 <- read.delim(file.path(getwd(),"pride_cluster_peptides_Mouse.tsv"), comment.char="#")
 
 #Split of the column in PEP and CPE
 new_data_frame_PEP_v1 = subset(pride_cluster_peptides_ALL_version1, PEH == 'PEP')
@@ -65,7 +69,7 @@ if (length(data_duplicate_v1$sequence)== 0) {
     
 } else {
     cat("Repeated sequences in release 1.\n")
-    pander(data_duplicate_v1)
+    kable(data_duplicate_v1)
 }
 
 #New data: 
@@ -79,7 +83,7 @@ if (length(data_duplicate_v2$sequence)== 0) {
     
 } else {
     cat("Repeated sequences in release 1.\n \n")
-    pander(data_duplicate_v2)
+    kable(data_duplicate_v2)
 }
 
 ```
@@ -161,13 +165,13 @@ if (nrow(df_final[is.na(df_final$PEH.1),])==0) {
     cat("The new release has not gained new peptides\n")
 } else {
     cat("The new release has  obtained new peptides\n")
-    pander(df_peptides2)
+    kable(df_peptides2)
 }
 
 #To know if the release has lost peptides.
 if (nrow(df_final[is.na(df_final$PEH.2),])!=0) {
     cat("The new release has lost peptides\n")
-    pander(df_peptides4)
+    kable(df_peptides4)
 } else {
     cat("The new release has not lost peptides\n")
 }
@@ -199,7 +203,7 @@ if (sum(df_final2$change == 0)) {
     cat("The number of spectras are the same\n")
 } else{
     cat("The number of Spectras are different\n")
-    pander(df_final3)
+    kable(df_final3)
 }
 
 
@@ -229,7 +233,7 @@ if (sum(df_final_project2$change == 0)) {
     cat("The number of projects are the same\n")
 } else {
     cat("The number of projects are different\n")
-    pander(df_final_project3)
+    kable(df_final_project3)
 }
 
 ```
@@ -255,7 +259,7 @@ if (sum(df_final_clusters2$change == 0)) {
     cat("The number of clusters are the same\n")
 } else {
     cat("The number of clusters are different\n")
-    pander(df_final_clusters3)
+    kable(df_final_clusters3)
 }
 
 ```
