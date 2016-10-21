@@ -37,8 +37,8 @@ library("knitr"); library("markdown"); library("tidyr"); library("reshape2")
 
 ```{r, include=FALSE}
 #Upload files using getwd
-pride_cluster_peptides_ALL_version1  <- read.delim(file.path(getwd(),"pride_cluster_peptides_Mouse.tsv"), comment.char="#")
-pride_cluster_peptides_ALL_version2 <- read.delim(file.path(getwd(),"pride_cluster_peptides_Mouse.tsv"), comment.char="#")
+pride_cluster_peptides_ALL_version1  <- read.delim(file.path(getwd(),"pride_cluster_peptides_ALL.tsv"), comment.char="#")
+pride_cluster_peptides_ALL_version2 <- read.delim(file.path(getwd(),"pride_cluster_peptides_ALL2.tsv"), comment.char="#")
 
 #Split of the column in PEP and CPE
 new_data_frame_PEP_v1 = subset(pride_cluster_peptides_ALL_version1, PEH == 'PEP')
@@ -328,7 +328,7 @@ histo5_2 <- data.frame(table(histo4_2))
 
 ```
 
-```{r, echo=FALSE, warning=FALSE, fig.width=15, fig.height= 10 }
+```{r, echo=FALSE, warning=FALSE, fig.width=25, fig.height= 15 }
 df <- cbind.data.frame(histo4, histo4_2[match(histo4$modifications, histo4_2$modifications.2), ])
 colnames(df) <- c("modifications.1","modifications.2")
 

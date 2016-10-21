@@ -5,7 +5,7 @@
 
 # INPUT: The input files must be in the same directory as the script, with the names: 
 # pride_cluster_peptides_ALL.tsv AND pride_cluster_peptides_ALL2.tsv, being the file "pride_cluster_peptides_ALL2.tsv" the new release to comparee.
-knitr::spin 
+
 # Upload packages
 packages <- c("data.table", "dplyr", "ggplot2", "stringr", "reshape2")
 if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
@@ -301,4 +301,14 @@ ggplot(melt(df,measure.vars = names(df)), aes(x = value, fill = variable)) +
     scale_fill_manual(values = c('red', 'blue'))
 
 
+#Comparative table
+
+df_freq1 <- data.frame(table(df$modifications.1))
+df_freq2 <- data.frame(table(df$modifications.2))
+colnames(df_freq1) <- c("Modifications.1", "Freq2")
+colnames(df_freq2) <- c("Modifications.2", "Freq2")
+
+df_freq3 <- cbind.data.frame(df_freq1, df_freq2[match(df_freq1$Modifications.1, df_freq2$Modifications.2), ])
+
+edit(df_freq3)
 
