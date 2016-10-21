@@ -37,7 +37,7 @@ library("knitr"); library("markdown"); library("tidyr"); library("reshape2")
 
 ```{r, include=FALSE}
 #Upload files using getwd
-pride_cluster_peptides_ALL_version1  <- read.delim(file.path(getwd(),"pride_cluster_peptides_Human.tsv"), comment.char="#")
+pride_cluster_peptides_ALL_version1  <- read.delim(file.path(getwd(),"pride_cluster_peptides_Mouse.tsv"), comment.char="#")
 pride_cluster_peptides_ALL_version2 <- read.delim(file.path(getwd(),"pride_cluster_peptides_Mouse.tsv"), comment.char="#")
 
 #Split of the column in PEP and CPE
@@ -111,7 +111,7 @@ if (length(new_data_frame_PEP_v1$sequence)>length(new_data_frame_PEP_v2$sequence
 ### **Peptides with no-modification:** 
 
 ```{r, echo=FALSE}
-cat("Release1:",length(new_data_frame_PEP_v1$modifications[new_data_frame_PEP_v1$modifications == "NULL"]), "\nRelease2: ", length(new_data_frame_PEP_v2$modifications[new_data_frame_PEP_v2$modifications == "NULL"]))
+cat("Release1:",length(new_data_frame_PEP_v1$modifications[new_data_frame_PEP_v1$modifications == "NULL"]), "\nRelease2:", length(new_data_frame_PEP_v2$modifications[new_data_frame_PEP_v2$modifications == "NULL"]))
 
 if (length(new_data_frame_PEP_v1$modifications[new_data_frame_PEP_v1$modifications == "NULL"])>length(new_data_frame_PEP_v2$modifications[new_data_frame_PEP_v2$modifications == "NULL"])) {
     cat("Peptides with no-modification reduced:\n", (length(new_data_frame_PEP_v1$modifications[new_data_frame_PEP_v1$modifications == "NULL"])-length(new_data_frame_PEP_v2$modifications[new_data_frame_PEP_v2$modifications == "NULL"])))
@@ -318,17 +318,17 @@ histo4_2 <- data.frame(modifications.2=gsub(" [A-Za-z] ", "", gsub("[0-9]*-", ""
 histo5 <- data.frame(table(histo4))
 histo5_2 <- data.frame(table(histo4_2))
 
-ggplot(data=histo5, aes(x=histo4, y=Freq, fill=histo4)) +
-    geom_bar(stat="identity") + guides(fill=FALSE)+ 
-    theme(axis.text.x = element_text(angle = 90, hjust = 1))
-
-ggplot(data=histo5_2, aes(x=histo4_2, y=Freq, fill=histo4_2)) +
-    geom_bar(stat="identity") + guides(fill=FALSE)+ 
-    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+# ggplot(data=histo5, aes(x=histo4, y=Freq, fill=histo4)) +
+#     geom_bar(stat="identity") + guides(fill=FALSE)+ 
+#     theme(axis.text.x = element_text(angle = 90, hjust = 1))
+# 
+# ggplot(data=histo5_2, aes(x=histo4_2, y=Freq, fill=histo4_2)) +
+#     geom_bar(stat="identity") + guides(fill=FALSE)+ 
+#     theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 ```
 
-```{r}
+```{r, echo=FALSE, warning=FALSE, fig.width=15, fig.height= 10 }
 df <- cbind.data.frame(histo4, histo4_2[match(histo4$modifications, histo4_2$modifications.2), ])
 colnames(df) <- c("modifications.1","modifications.2")
 
@@ -341,10 +341,24 @@ ggplot((df2), aes(x = value, fill = variable)) +
     labs("Barplot Release1 vs Release 2") + 
     xlab("Values")+
     ylab("Frequency")+
-    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+    theme(text = element_text(size=18), axis.text.x = element_text(angle = 90, hjust = 1, size = 15), axis.text.y=element_text(size = 15))
 ```
 
- 
+### **Frequency table:**
+```{r, echo=FALSE, }
+#Comparative table. 
+
+df_freq1 <- data.frame(table(df$modifications.1))
+df_freq2 <- data.frame(table(df$modifications.2))
+colnames(df_freq1) <- c("Modifications.1", "Frequency")
+colnames(df_freq2) <- c("Modifications.2", "Frequency")
+
+df_freq3 <- cbind.data.frame(df_freq1, df_freq2[match(df_freq1$Modifications.1, df_freq2$Modifications.2), ])
+kable(df_freq3, row.names = FALSE, padding = 0)
+
+
+```
+
 
 
 
