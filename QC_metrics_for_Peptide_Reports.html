@@ -116,7 +116,7 @@ $(document).ready(function () {
 
 
 <h1 class="title toc-ignore"><strong>QC metrics Peptide Reports</strong></h1>
-<h4 class="date"><em>21 octubre, 2016</em></h4>
+<h4 class="date"><em>24 octubre, 2016</em></h4>
 
 </div>
 
@@ -138,37 +138,116 @@ $(document).ready(function () {
 <div id="total-number-of-peptides" class="section level3">
 <h3><strong>Total number of peptides:</strong></h3>
 <pre><code>## Release1: 244899 
-## Release2: 244899</code></pre>
-<pre><code>## The number of peptides are equals</code></pre>
+## Release2: 244901</code></pre>
+<pre><code>## Peptides increased: 2</code></pre>
 </div>
 <div id="peptides-with-no-modification" class="section level3">
 <h3><strong>Peptides with no-modification:</strong></h3>
 <pre><code>## Release1: 158864 
-## Release2: 158864</code></pre>
-<pre><code>## The number of peptides with no-modifications are equals.</code></pre>
+## Release2: 158865</code></pre>
+<pre><code>## Peptides with no-modification increased: 1</code></pre>
 </div>
 <div id="peptides-with-modifications" class="section level3">
 <h3><strong>Peptides with modifications:</strong></h3>
 <pre><code>## Release1:  86035 
-## Release2:  86035</code></pre>
-<pre><code>## The number of peptides with modifications are equals.</code></pre>
+## Release2:  86036</code></pre>
+<pre><code>## Peptides with modification increased: 1</code></pre>
 </div>
 <div id="new-peptides" class="section level3">
 <h3><strong>New peptides</strong>:</h3>
-<pre><code>## The new release has not gained new peptides</code></pre>
-<pre><code>## The new release has not lost peptides</code></pre>
+<pre><code>## The new release has obtained new peptides</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">sequences</th>
+<th align="left">modifications</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">TTAAATATATATAA</td>
+<td align="left">NULL</td>
+</tr>
+<tr class="even">
+<td align="left">TTAAATATATATAA</td>
+<td align="left">52-PRUEBA:21</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div id="new-peptides-spectra" class="section level3">
 <h3><strong>New peptides spectra:</strong></h3>
-<pre><code>## The number of spectras are the same</code></pre>
+<pre class="r"><code>df$peptideNumberSpectra=as.numeric(as.character(df$peptideNumberSpectra))
+df2$peptideNumberSpectra=as.numeric(as.character(df2$peptideNumberSpectra))
+
+
+df_final&lt;- df %&gt;% 
+    full_join(df2, by = c(&quot;sequence&quot;, &quot;modifications&quot;), suffix = c(&quot;.1&quot;, &quot;.2&quot;)) %&gt;%
+    # Fix data to convert to character and numeric
+    mutate_each(funs(as.numeric(as.character(.))), starts_with(&quot;pept&quot;)) %&gt;%
+    # See difference
+    mutate(change = peptideNumberSpectra.2 - peptideNumberSpectra.1)</code></pre>
+<pre><code>## Warning in full_join_impl(x, y, by$x, by$y, suffix$x, suffix$y): joining
+## factors with different levels, coercing to character vector
+
+## Warning in full_join_impl(x, y, by$x, by$y, suffix$x, suffix$y): joining
+## factors with different levels, coercing to character vector</code></pre>
+<pre class="r"><code>df_peptides_spectra &lt;- df_final[is.na(df_final$PEH.1),]
+df_peptides_spectra2 &lt;- data.frame(sequences=df_peptides$sequence, modifications=df_peptides$modifications, peptideNumberSpectra=df_peptides$peptideNumberSpectra.2)
+
+df_peptides_spectra3 &lt;- df_final[is.na(df_final$PEH.2),]
+df_peptides_spectra4 &lt;- data.frame(sequences=df_peptides$sequence, modifications=df_peptides$modifications, peptideNumberSpectra=df_peptides$peptideNumberSpectra.1)
+
+
+#df_finalX = subset(final_df, change != 'NA') Remove NA from the column
+df_final2 &lt;- subset(df_final, change != 0) # Check the column change to know if there are rows. 
+df_final3 &lt;- data.frame(sequence= df_final2$sequence, modifications= df_final2$modifications, SpectraChange=df_final2$change)
+
+library(pander)
+if (sum(df_final2$change)!=0 &amp;&amp; nrow(df_final[is.na(df_final$PEH.1),])!=0) {
+    cat(&quot;The new peptide Spectras are:&quot;, &quot;\n&quot;)
+    kable(df_peptides_spectra2)
+    cat(&quot;The new spectras decresed or incresed are:&quot;, &quot;\n&quot;)
+    kable(df_final3)
+} else if (sum(df_final2$change)==0 &amp;&amp; nrow(df_final[is.na(df_final$PEH.1),])!=0) {
+    cat(&quot;The new peptide Spectras are:&quot;, &quot;\n&quot;)
+    pander(df_peptides_spectra2)
+    cat(&quot;The rest of spectras are the same.&quot;, &quot;\n&quot;)
+} else if (sum(df_final2$change)!=0 &amp;&amp; nrow(df_final[is.na(df_final$PEH.1),])==0) {
+    cat(&quot;The are not new peptide Spectras.&quot;, &quot;\n&quot;)    
+    cat(&quot;The new spectras decresed or incresed are:\n&quot;)
+    kable(df_final3)  
+} else
+    cat(&quot;The number of spectras are the same&quot;, &quot;\n&quot;)</code></pre>
+<pre><code>## The new peptide Spectras are: 
+## The rest of spectras are the same.</code></pre>
+<pre class="r"><code>if ((sum(df_final2$change)!=0)&amp;&amp;(nrow(df_final[is.na(df_final$PEH.1),])!=0)) {
+    cat(&quot;The new peptide Spectras are:\n&quot;)
+    kable(df_peptides_spectra2)
+    cat(&quot;The new spectras decresed or incresed are:\n&quot;)
+    kable(df_final3)
+} else if ((sum(df_final2$change)==0)&amp;&amp;(nrow(df_final[is.na(df_final$PEH.1),])!=0)) {
+    cat(&quot;The new peptide Spectras are:\n&quot;)
+    kable(df_peptides_spectra2)
+    cat(&quot;The rest of spectras are the same.\n&quot;)
+} else if (((sum(df_final2$change)!=0)&amp;&amp;nrow(df_final[is.na(df_final$PEH.1),])==0)) {
+    cat(&quot;The are not new peptide Spectras:\n&quot;)    
+    cat(&quot;The new spectras decresed or incresed are:\n&quot;)
+    kable(df_final3)
+} else
+    cat(&quot;The number of spectras are the same\n&quot;)</code></pre>
+<pre><code>## The new peptide Spectras are:
+## The rest of spectras are the same.</code></pre>
 </div>
 <div id="new-projects" class="section level3">
 <h3><strong>New projects</strong>:</h3>
-<pre><code>## The number of projects are the same</code></pre>
+<pre><code>## The new projects are:
+## The number of spectras are the same.</code></pre>
 </div>
 <div id="new-clusters" class="section level3">
 <h3><strong>New clusters</strong></h3>
-<pre><code>## The number of clusters are the same</code></pre>
+<pre><code>## The new clusters are:
+## The number of clusters are the same.</code></pre>
 </div>
 <div id="barplot" class="section level3">
 <h3><strong>Barplot</strong>:</h3>
