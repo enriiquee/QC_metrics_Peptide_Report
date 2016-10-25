@@ -34,7 +34,7 @@ library("knitr"); library("markdown"); library("tidyr"); library("reshape2"); li
 
 ```
 
-```{r, include=FALSE}
+```{r, include=FALSE, cache=TRUE}
 #Upload files using getwd
 pride_cluster_peptides_ALL_version1  <- read.delim(file.path(getwd(),"pride_cluster_peptides_ALL.tsv"), comment.char="#")
 pride_cluster_peptides_ALL_version2 <- read.delim(file.path(getwd(),"pride_cluster_peptides_ALL2_prueba.csv"), comment.char="#")
@@ -178,7 +178,7 @@ if (nrow(df_final[is.na(df_final$PEH.1),])!=0) {
  
 ### **New peptides spectra:**  
 
-```{r, echo=TRUE, warning=TRUE}
+```{r, echo=FALSE, warning=FALSE, results='asis'}
 df$peptideNumberSpectra=as.numeric(as.character(df$peptideNumberSpectra))
 df2$peptideNumberSpectra=as.numeric(as.character(df2$peptideNumberSpectra))
 
@@ -202,50 +202,31 @@ df_peptides_spectra4 <- data.frame(sequences=df_peptides$sequence, modifications
 df_final2 <- subset(df_final, change != 0) # Check the column change to know if there are rows. 
 df_final3 <- data.frame(sequence= df_final2$sequence, modifications= df_final2$modifications, SpectraChange=df_final2$change)
 
-library(pander)
+
 if (sum(df_final2$change)!=0 && nrow(df_final[is.na(df_final$PEH.1),])!=0) {
     cat("The new peptide Spectras are:", "\n")
-    kable(df_peptides_spectra2)
+    print(kable(df_peptides_spectra2))
+    cat("\n")
     cat("The new spectras decresed or incresed are:", "\n")
-    kable(df_final3)
+    print(kable(df_final3))
 } else if (sum(df_final2$change)==0 && nrow(df_final[is.na(df_final$PEH.1),])!=0) {
     cat("The new peptide Spectras are:", "\n")
-    pander(df_peptides_spectra2)
+    print(kable(df_peptides_spectra2))
+    cat("\n")
     cat("The rest of spectras are the same.", "\n")
 } else if (sum(df_final2$change)!=0 && nrow(df_final[is.na(df_final$PEH.1),])==0) {
     cat("The are not new peptide Spectras.", "\n")    
     cat("The new spectras decresed or incresed are:\n")
-    kable(df_final3)  
+    print(kable(df_final3))
 } else
     cat("The number of spectras are the same", "\n")
-
-
-
-
-if ((sum(df_final2$change)!=0)&&(nrow(df_final[is.na(df_final$PEH.1),])!=0)) {
-    cat("The new peptide Spectras are:\n")
-    kable(df_peptides_spectra2)
-    cat("The new spectras decresed or incresed are:\n")
-    kable(df_final3)
-} else if ((sum(df_final2$change)==0)&&(nrow(df_final[is.na(df_final$PEH.1),])!=0)) {
-    cat("The new peptide Spectras are:\n")
-    kable(df_peptides_spectra2)
-    cat("The rest of spectras are the same.\n")
-} else if (((sum(df_final2$change)!=0)&&nrow(df_final[is.na(df_final$PEH.1),])==0)) {
-    cat("The are not new peptide Spectras:\n")    
-    cat("The new spectras decresed or incresed are:\n")
-    kable(df_final3)
-} else
-    cat("The number of spectras are the same\n")
-
-
 
 ```
 
 
 ### **New projects**:  
 
-```{r, echo=FALSE, warning=FALSE}
+```{r, echo=FALSE, warning=FALSE, results='asis'}
 df$numberProjects=as.numeric(as.character(df$numberProjects))
 df2$numberProjects=as.numeric(as.character(df2$numberProjects))
 
@@ -259,10 +240,10 @@ df_final_project<- df %>%
 
 
 df_numberProjects <- df_final[is.na(df_final$PEH.1),]
-df_numberProjects2 <- data.frame(sequences=df_numberProjects$sequence,  numberProjects=df_numberProjects$numberProjects.2, peptideNumberSpectra=df_numberProjects$numberProjects.2)
+df_numberProjects2 <- data.frame(sequences=df_numberProjects$sequence, modifications= df_numberProjects$modifications, numberProjects=df_numberProjects$numberProjects.2)
 
 df_numberProjects3 <- df_final[is.na(df_final$PEH.2),]
-df_numberProjects4 <- data.frame(sequences=df_numberProjects$sequence, numberProjects=df_numberProjects$numberProjects.1, peptideNumberSpectra=df_numberProjects$numberProjects.1)
+df_numberProjects4 <- data.frame(sequences=df_numberProjects$sequence, modifications= df_numberProjects$modifications, numberProjects=df_numberProjects$numberProjects.1)
 
 
 #df_finalX = subset(final_df, change != 'NA') Remove NA from the column
@@ -273,22 +254,26 @@ df_final3 <- data.frame(sequence= df_final2$sequence, numberProjects= df_final2$
 
 if (sum(df_final2$change) != 0 && nrow(df_final[is.na(df_final$PEH.1),])!=0 ) {
     cat("The new projects are:\n")
-    kable(df_numberProjects2)
+    print(kable(df_numberProjects2))
+    cat("\n")
     cat("The new number of projects decresed or incresed are:\n")
-    kable(df_final3)
+    print(kable(df_final3))
 } else if (sum(df_final2$change) == 0 && nrow(df_final[is.na(df_final$PEH.1),])!=0 ) {
     cat("The new projects are:\n")
-    kable(df_numberProjects2)
+    print(kable(df_numberProjects2))
+    cat("\n")
     cat("The number of spectras are the same.\n")
 } else if (sum(df_final2$change) != 0 && nrow(df_final[is.na(df_final$PEH.1),])==0 ) {
     cat("The new number of projects decresed or incresed are:\n")
-    kable(df_final3)
+    print(kable(df_final3))
 } else
     cat("The number of projects are the same\n")
 
 ```
+
 ### **New clusters**
-```{r, echo=FALSE, warning=FALSE}
+
+```{r, echo=FALSE, warning=FALSE, results='asis'}
 df$numberClusters=as.numeric(as.character(df$numberClusters))
 df2$numberClusters=as.numeric(as.character(df2$numberClusters))
 
@@ -302,10 +287,11 @@ df_final_clusters<- df %>%
 
 
 df_cluster <- df_final[is.na(df_final$PEH.1),]
-df_cluster2 <- data.frame(sequences=df_cluster$sequence, modifications=df_cluster$modifications, peptideNumberSpectra=df_cluster$peptideNumberSpectra.2)
+df_cluster2 <- data.frame(sequences=df_cluster$sequence, modifications=df_cluster$modifications, numberClusters=df_cluster$numberClusters.2) 
+
 
 df_cluster3 <- df_final[is.na(df_final$PEH.2),]
-df_cluster4 <- data.frame(sequences=df_cluster$sequence, modifications=df_cluster$modifications, peptideNumberSpectra=df_cluster$peptideNumberSpectra.1)
+df_cluster4 <- data.frame(sequences=df_cluster$sequence, modifications=df_cluster$modifications, numberClusters=df_cluster$numberClusters.1) 
 
 
 #df_finalX = subset(final_df, change != 'NA') Remove NA from the column
@@ -316,16 +302,18 @@ df_final3 <- data.frame(sequence= df_final2$sequence, modifications= df_final2$m
 
 if (sum(df_final2$change) != 0 && nrow(df_final[is.na(df_final$PEH.1),])!=0 ) {
     cat("The new clusters are:\n")
-    kable(df_cluster2)
+    print(kable(df_cluster2))
+    cat("\n")
     cat("The number of clusters decresed or incresed are:\n")
-    kable(df_final3)
+    print(kable(df_final3))
 } else if (sum(df_final2$change) == 0 && nrow(df_final[is.na(df_final$PEH.1),])!=0 ) {
     cat("The new clusters are:\n")
-    kable(df_cluster2)
+    print(kable(df_cluster2))
+    cat("\n")
     cat("The number of clusters are the same.\n")
 } else if (sum(df_final2$change) != 0 && nrow(df_final[is.na(df_final$PEH.1),])==0 ) {
     cat("The number of clusters decresed or incresed are:\n")
-    kable(df_final3)
+    print(kable(df_final3))
 } else
     cat("The number of clusters are the same\n")
 
@@ -392,8 +380,9 @@ histo5_2 <- data.frame(table(histo4_2))
 ```
 
 ```{r, echo=FALSE, warning=FALSE, fig.width=25, fig.height= 15 }
-df <- cbind.data.frame(histo4, histo4_2[match(histo4$modifications, histo4_2$modifications.2), ])
+df <- cbind.data.frame(histo4_2, histo4[match(histo4_2$modifications.2, histo4$modifications), ])
 colnames(df) <- c("modifications.1","modifications.2")
+
 
 df2 <- melt(df,measure.vars = names(df))
 
