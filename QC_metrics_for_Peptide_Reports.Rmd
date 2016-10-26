@@ -4,12 +4,6 @@ date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: html_document
 ---
 
-
-```{r, include=FALSE}
- Sys.setenv(RSTUDIO_PANDOC="C:/Program Files/RStudio/bin/pandoc")
-
-``` 
-
 ```{r}
 # PRIDE Cluster clusters all MS/MS spectra submitted to PRIDE Archive repository release: 2015-04
 # http://www.ebi.ac.uk/pride/cluster/

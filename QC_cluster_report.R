@@ -1,21 +1,32 @@
+
+{r}
 # PRIDE Cluster clusters all MS/MS spectra submitted to PRIDE Archive repository release: 2015-04
 # http://www.ebi.ac.uk/pride/cluster/
- 
-# Description: The present script provides a reliable QC (Quality control) report about peptides in PRIDE Cluster. 
+
+# Description:The present script provides a reliable QC (Quality control) report about peptides in PRIDE Cluster.
 
 # INPUT: The input files must be in the same directory as the script, with the names: 
-# pride_cluster_peptides_ALL.tsv AND pride_cluster_peptides_ALL2.tsv, being the file "pride_cluster_peptides_ALL2.tsv" the new release to comparee.
+# - pride_cluster_peptides_ALL.tsv 
+# - pride_cluster_peptides_ALL2.tsv 
+# being the file "pride_cluster_peptides_ALL2.tsv" the new release to comparer.
 
+
+
+{r, include=FALSE}
 # Upload packages
-packages <- c("data.table", "dplyr", "ggplot2", "stringr", "reshape2")
+packages <- c("data.table", "dplyr", "ggplot2", "stringr", "knitr", "markdown", "tidyr", "reshape2", "rmarkdown")
 if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
     install.packages(setdiff(packages, rownames(installed.packages())))  }
 
 library("data.table"); library("dplyr"); library("ggplot2"); library("stringr"); 
-library(knitr); library("reshape2")
+library("knitr"); library("markdown"); library("tidyr"); library("reshape2"); library("rmarkdown")
+
+
+
+{r, include=FALSE}
 #Upload files using getwd
-pride_cluster_peptides_ALL_version1  <- read.delim(file.path(getwd(),"pride_cluster_peptides_Human.tsv"), comment.char="#")
-pride_cluster_peptides_ALL_version2 <- read.delim(file.path(getwd(),"pride_cluster_peptides_Human2.tsv"), comment.char="#")
+pride_cluster_peptides_ALL_version1  <- read.delim(file.path(getwd(),"pride_cluster_peptides_ALL.tsv"), comment.char="#")
+pride_cluster_peptides_ALL_version2 <- read.delim(file.path(getwd(),"pride_cluster_peptides_ALL2.tsv"), comment.char="#")
 
 #Split of the column in PEP and CPE
 new_data_frame_PEP_v1 = subset(pride_cluster_peptides_ALL_version1, PEH == 'PEP')
@@ -23,6 +34,13 @@ new_data_frame_CPE_v1 = subset(pride_cluster_peptides_ALL_version1, PEH == 'CPE'
 
 new_data_frame_PEP_v2 = subset(pride_cluster_peptides_ALL_version2, PEH == 'PEP')
 new_data_frame_CPE_v2 = subset(pride_cluster_peptides_ALL_version2, PEH == 'CPE')
+
+
+
+
+
+### **Repeated Sequences Results:**  
+
 
 # Checking repeated sequences.
 # Here, we call duplicated twice: first from the start of the sequence column to the 
@@ -33,21 +51,17 @@ new_data_frame_CPE_v2 = subset(pride_cluster_peptides_ALL_version2, PEH == 'CPE'
 # duplicated values in both the sequence and modification columns, we need to select 
 # those columns to pass to duplicated. This can be done using subset:
 
-cat("===============================================================================\n")
-cat( "REPEATED SEQUENCES RESULTS:\n")
-cat("===============================================================================\n")
-
 res_v1 <- new_data_frame_PEP_v1[duplicated(new_data_frame_PEP_v1$sequence) | duplicated(new_data_frame_PEP_v1$sequence, fromLast=TRUE),]
 seq.mod_v1 <- subset(new_data_frame_PEP_v1, select=c("sequence","modifications"))
 data_duplicate_v1 <- new_data_frame_PEP_v1[duplicated(seq.mod_v1) | duplicated(seq.mod_v1, fromLast=TRUE),]
 
 
 if (length(data_duplicate_v1$sequence)== 0) {
-    cat("No repeated values in release 1. \n")
+    cat("No repeated sequences in release 1. \n")
     
 } else {
-    cat("Repeated values in release 1.\n")
-    print(data_duplicate_v1)
+    cat("Repeated sequences in release 1.\n")
+    kable(data_duplicate_v1)
 }
 
 #New data: 
@@ -57,18 +71,21 @@ data_duplicate_v2 <- new_data_frame_PEP_v2[duplicated(seq.mod_v2) | duplicated(s
 
 
 if (length(data_duplicate_v2$sequence)== 0) {
-    cat("No repeated values in release 2.\n")
+    cat("No repeated sequences in release 2.\n")
     
 } else {
-    cat("Repeated values in release 1.\n \n")
-    print(data_duplicate_v2)
+    cat("Repeated sequences in release 1.\n \n")
+    kable(data_duplicate_v2)
 }
-cat("===============================================================================\n")
-cat( "TOTAL NUMBER OF PEPTIDES:\n")
-cat("===============================================================================\n")
+
+
+
+### **Total number of peptides:**  
+
 
 #Total number: 
 cat("Release1:", length(new_data_frame_PEP_v1$sequence),"\nRelease2:", length(new_data_frame_PEP_v2$sequence),"\n")
+
 #Conditional
 if (length(new_data_frame_PEP_v1$sequence)>length(new_data_frame_PEP_v2$sequence)) {
     cat("Peptides reduced:", (length(new_data_frame_PEP_v1$sequence)-length(new_data_frame_PEP_v2$sequence)),"\n")
@@ -78,35 +95,40 @@ if (length(new_data_frame_PEP_v1$sequence)>length(new_data_frame_PEP_v2$sequence
     cat("The number of peptides are equals \n")
 
 
-cat("===============================================================================\n")
-cat( "PEPTIDES WITH NO-MODIFICATIONS\n")
-cat("===============================================================================\n")
-cat("Release1:",length(new_data_frame_PEP_v1$modifications[new_data_frame_PEP_v1$modifications == "NULL"]), "Release2: ", length(new_data_frame_PEP_v2$modifications[new_data_frame_PEP_v2$modifications == "NULL"]))
+
+### **Peptides with no-modification:** 
+
+
+cat("Release1:",length(new_data_frame_PEP_v1$modifications[new_data_frame_PEP_v1$modifications == "NULL"]), "\nRelease2:", length(new_data_frame_PEP_v2$modifications[new_data_frame_PEP_v2$modifications == "NULL"]))
+
 if (length(new_data_frame_PEP_v1$modifications[new_data_frame_PEP_v1$modifications == "NULL"])>length(new_data_frame_PEP_v2$modifications[new_data_frame_PEP_v2$modifications == "NULL"])) {
-    cat("Peptides with no-modification reduced:\n", (length(new_data_frame_PEP_v1$modifications[new_data_frame_PEP_v1$modifications == "NULL"])-length(new_data_frame_PEP_v2$modifications[new_data_frame_PEP_v2$modifications == "NULL"])))
+    cat("Peptides with no-modification reduced:", (length(new_data_frame_PEP_v1$modifications[new_data_frame_PEP_v1$modifications == "NULL"])-length(new_data_frame_PEP_v2$modifications[new_data_frame_PEP_v2$modifications == "NULL"])))
 } else if ( length(new_data_frame_PEP_v1$modifications)<length(new_data_frame_PEP_v2$modifications)) {
-    cat("Peptides with no-modification increased:\n", (length(new_data_frame_PEP_v2$modifications[new_data_frame_PEP_v2$modifications == "NULL"])-length(new_data_frame_PEP_v1$modifications[new_data_frame_PEP_v1$modifications == "NULL"])))
+    cat("Peptides with no-modification increased:", (length(new_data_frame_PEP_v2$modifications[new_data_frame_PEP_v2$modifications == "NULL"])-length(new_data_frame_PEP_v1$modifications[new_data_frame_PEP_v1$modifications == "NULL"])))
 } else
     cat("The number of peptides with no-modifications are equals.\n")
 
 
 
 
-cat("===============================================================================\n")
-cat( "PEPTIDES WITH MODIFICATIONS\n")
-cat("===============================================================================\n")
-cat("v1: ",length(new_data_frame_PEP_v1$modifications[new_data_frame_PEP_v1$modifications != "NULL"]), "v2: ", length(new_data_frame_PEP_v2$modifications[new_data_frame_PEP_v2$modifications != "NULL"]))
+### **Peptides with modifications:** 
+
+
+cat("Release1: ",length(new_data_frame_PEP_v1$modifications[new_data_frame_PEP_v1$modifications != "NULL"]), "\nRelease2: ", length(new_data_frame_PEP_v2$modifications[new_data_frame_PEP_v2$modifications != "NULL"]))
+
 if (length(new_data_frame_PEP_v1$modifications[new_data_frame_PEP_v1$modifications != "NULL"])>length(new_data_frame_PEP_v1$modifications[new_data_frame_PEP_v2$modifications != "NULL"])) {
-    cat("Peptides with modification reduced:\n", (length(new_data_frame_PEP_v1$modifications[new_data_frame_PEP_v1$modifications != "NULL"])-length(new_data_frame_PEP_v2$modifications[new_data_frame_PEP_v2$modifications != "NULL"])))
+    cat("Peptides with modification reduced:", (length(new_data_frame_PEP_v1$modifications[new_data_frame_PEP_v1$modifications != "NULL"])-length(new_data_frame_PEP_v2$modifications[new_data_frame_PEP_v2$modifications != "NULL"])))
 } else if ( length(new_data_frame_PEP_v1$modifications)<length(new_data_frame_PEP_v2$modifications)) {
-    cat("Peptides with modification increased:\n", (length(new_data_frame_PEP_v2$modifications[new_data_frame_PEP_v2$modifications != "NULL"])-length(new_data_frame_PEP_v1$modifications[new_data_frame_PEP_v1$modifications != "NULL"])))
+    cat("Peptides with modification increased:", (length(new_data_frame_PEP_v2$modifications[new_data_frame_PEP_v2$modifications != "NULL"])-length(new_data_frame_PEP_v1$modifications[new_data_frame_PEP_v1$modifications != "NULL"])))
 } else
     cat("The number of peptides with modifications are equals.\n")
 
-cat("===============================================================================\n")
-cat( "NEW PEPTIDES:\n")
-cat("==============================================================================\n")
 
+
+### **New peptides**:  
+
+
+#Create a df to make it easier
 df <- new_data_frame_PEP_v1
 df2 <- new_data_frame_PEP_v2
 
@@ -123,32 +145,27 @@ df_final<- df %>%
     # See difference
     mutate(change = peptideNumberSpectra.2 - peptideNumberSpectra.1)
 
-#How many new peptides there are in the new release. 
+#How many new peptides are there  in the new release?. 
 df_peptides <- df_final[is.na(df_final$PEH.1),]
 df_peptides2 <- data.frame(sequences=df_peptides$sequence, modifications=df_peptides$modifications)
 
 df_peptides3 <- df_final[is.na(df_final$PEH.2),]
 df_peptides4 <- data.frame(sequences=df_peptides3$sequence, modifications=df_peptides3$modifications)
 
-#To know if the new release has obtained. 
-if (length(df_final[is.na(df_final$PEH.1),])==0) {
-    cat("The new release has got the same peptides than release before\n")
-} else {
-    cat("The new release has  obtained new peptides\n")
-    print(df_peptides2)
-}
-
-#To know if the release has lost peptides.
-if (length(df_final[is.na(df_final$PEH.2),])!=0) {
+#To know if the new release has obtained new peptides. 
+if (nrow(df_final[is.na(df_final$PEH.1),])!=0) {
+    cat("The new release has obtained new peptides\n")
+    kable(df_peptides2, padding = 0)
+} else if (nrow(df_final[is.na(df_final$PEH.2),])!=0) {
     cat("The new release has lost peptides\n")
-    print(df_peptides4)
-} else {
-    cat("The new release has not lost peptides\n")
-}
+    kable(df_peptides4, padding = 0)
+} else
+    cat("The new release has got the same peptides\n")
 
-cat("===============================================================================\n")
-cat( "NEW PEPTIDES SPECTRA:\n")
-cat("===============================================================================\n")
+
+
+
+### **New peptides spectra:**  
 
 
 df$peptideNumberSpectra=as.numeric(as.character(df$peptideNumberSpectra))
@@ -163,22 +180,41 @@ df_final<- df %>%
     mutate(change = peptideNumberSpectra.2 - peptideNumberSpectra.1)
 
 
+df_peptides_spectra <- df_final[is.na(df_final$PEH.1),]
+df_peptides_spectra2 <- data.frame(sequences=df_peptides$sequence, modifications=df_peptides$modifications, peptideNumberSpectra=df_peptides$peptideNumberSpectra.2)
+
+df_peptides_spectra3 <- df_final[is.na(df_final$PEH.2),]
+df_peptides_spectra4 <- data.frame(sequences=df_peptides$sequence, modifications=df_peptides$modifications, peptideNumberSpectra=df_peptides$peptideNumberSpectra.1)
+
+
 #df_finalX = subset(final_df, change != 'NA') Remove NA from the column
-df_final2 <- subset(df_final, change == 0) 
-df_final3 <- data.frame(sequence= df_final2$sequence, modifications= df_final2$modifications, Change=df_final2$change)
+df_final2 <- subset(df_final, change != 0) # Check the column change to know if there are rows. 
+df_final3 <- data.frame(sequence= df_final2$sequence, modifications= df_final2$modifications, SpectraChange=df_final2$change)
+
+
+if (sum(df_final2$change)!=0 && nrow(df_final[is.na(df_final$PEH.1),])!=0) {
+    cat("The new peptide spectra are:", "\n")
+    print(kable(df_peptides_spectra2))
+    cat("\n")
+    cat("The new spectra decreased  or increased are:", "\n")
+    print(kable(df_final3))
+} else if (sum(df_final2$change)==0 && nrow(df_final[is.na(df_final$PEH.1),])!=0) {
+    cat("The new peptide spectra are:", "\n")
+    print(kable(df_peptides_spectra2))
+    cat("\n")
+    cat("The rest of spectra are the same.", "\n")
+} else if (sum(df_final2$change)!=0 && nrow(df_final[is.na(df_final$PEH.1),])==0) {
+    cat("The are not new peptide spectra.", "\n")    
+    cat("The new spectra decreased  or increased are:\n")
+    print(kable(df_final3))
+} else
+    cat("The number of spectra are the same", "\n")
 
 
 
-if (sum(df_final2$change == 0)) {
-    cat("The number of spectras are the same\n")
-} else{
-    cat("The number of Spectras are different\n")
-    print(df_final3)
-}
 
-cat("===============================================================================\n")
-cat( "NEW PROJECTS:\n")
-cat("===============================================================================\n")
+### **New projects**:  
+
 
 df$numberProjects=as.numeric(as.character(df$numberProjects))
 df2$numberProjects=as.numeric(as.character(df2$numberProjects))
@@ -192,20 +228,40 @@ df_final_project<- df %>%
     mutate(change = numberProjects.2 - numberProjects.1)
 
 
+df_numberProjects <- df_final[is.na(df_final$PEH.1),]
+df_numberProjects2 <- data.frame(sequences=df_numberProjects$sequence, modifications= df_numberProjects$modifications, numberProjects=df_numberProjects$numberProjects.2)
+
+df_numberProjects3 <- df_final[is.na(df_final$PEH.2),]
+df_numberProjects4 <- data.frame(sequences=df_numberProjects$sequence, modifications= df_numberProjects$modifications, numberProjects=df_numberProjects$numberProjects.1)
+
+
 #df_finalX = subset(final_df, change != 'NA') Remove NA from the column
-df_final_project2 <- subset(df_final_project, change != 0) 
-df_final_project3 <- data.frame(sequence= df_final_project2$sequence, modifications= df_final_project2$modifications, Change=df_final_project2$change)
+df_final2 <- subset(df_final, change != 0) # Check the column change to know if there are rows. 
+df_final3 <- data.frame(sequence= df_final2$sequence, numberProjects= df_final2$numberProjects.2,Change=df_final2$change)
 
-if (sum(df_final_project2$change == 0)) {
-    cat("The number of spectras are the same\n")
-} else {
-    cat("The number of Spectras are different\n")
-    print(df_final_project3)
-}
 
-cat("===============================================================================\n")
-cat( "NEW CLUSTERS:\n")
-cat("===============================================================================\n")
+
+if (sum(df_final2$change) != 0 && nrow(df_final[is.na(df_final$PEH.1),])!=0 ) {
+    cat("The new projects are:\n")
+    print(kable(df_numberProjects2))
+    cat("\n")
+    cat("The new number of projects decreased  or increased are:\n")
+    print(kable(df_final3))
+} else if (sum(df_final2$change) == 0 && nrow(df_final[is.na(df_final$PEH.1),])!=0 ) {
+    cat("The new projects are:\n")
+    print(kable(df_numberProjects2))
+    cat("\n")
+    cat("The number of spectra are the same.\n")
+} else if (sum(df_final2$change) != 0 && nrow(df_final[is.na(df_final$PEH.1),])==0 ) {
+    cat("The new number of projects decreased  or increased are:\n")
+    print(kable(df_final3))
+} else
+    cat("The number of projects are the same\n")
+
+
+
+### **New clusters**
+
 
 df$numberClusters=as.numeric(as.character(df$numberClusters))
 df2$numberClusters=as.numeric(as.character(df2$numberClusters))
@@ -219,16 +275,42 @@ df_final_clusters<- df %>%
     mutate(change = numberClusters.2 - numberClusters.1)
 
 
-#df_finalX = subset(final_df, change != 'NA') Remove NA from the column
-df_final_clusters2 <- subset(df_final_clusters, change != 0) 
-df_final_clusters3 <- data.frame(sequence= df_final_clusters2$sequence, modifications= df_final_clusters2$modifications, Change=df_final_clusters2$change)
+df_cluster <- df_final[is.na(df_final$PEH.1),]
+df_cluster2 <- data.frame(sequences=df_cluster$sequence, modifications=df_cluster$modifications, numberClusters=df_cluster$numberClusters.2) 
 
-if (sum(df_final_clusters2$change == 0)) {
-    cat("The number of spectras are the same\n")
-} else {
-    cat("The number of Spectras are different\n")
-    print(df_final_clusters3)
-}
+
+df_cluster3 <- df_final[is.na(df_final$PEH.2),]
+df_cluster4 <- data.frame(sequences=df_cluster$sequence, modifications=df_cluster$modifications, numberClusters=df_cluster$numberClusters.1) 
+
+
+#df_finalX = subset(final_df, change != 'NA') Remove NA from the column
+df_final2 <- subset(df_final, change != 0) # Check the column change to know if there are rows. 
+df_final3 <- data.frame(sequence= df_final2$sequence, modifications= df_final2$modifications, Change=df_final2$change)
+
+
+
+if (sum(df_final2$change) != 0 && nrow(df_final[is.na(df_final$PEH.1),])!=0 ) {
+    cat("The new clusters are:\n")
+    print(kable(df_cluster2))
+    cat("\n")
+    cat("The number of clusters decreased  or increased are:\n")
+    print(kable(df_final3))
+} else if (sum(df_final2$change) == 0 && nrow(df_final[is.na(df_final$PEH.1),])!=0 ) {
+    cat("The new clusters are:\n")
+    print(kable(df_cluster2))
+    cat("\n")
+    cat("The number of clusters are the same.\n")
+} else if (sum(df_final2$change) != 0 && nrow(df_final[is.na(df_final$PEH.1),])==0 ) {
+    cat("The number of clusters decreased  or increased are:\n")
+    print(kable(df_final3))
+} else
+    cat("The number of clusters are the same\n")
+
+
+
+
+### **Barplot**: 
+
 
 #HISTOGRAM: 
 #Para preparar el histograma tenemos que clasificar los tipos de modificaciones, POSICION-DATABA-ID. 
@@ -276,39 +358,44 @@ histo4_2 <- data.frame(modifications.2=gsub(" [A-Za-z] ", "", gsub("[0-9]*-", ""
 histo5 <- data.frame(table(histo4))
 histo5_2 <- data.frame(table(histo4_2))
 
-ggplot(data=histo5, aes(x=histo4, y=Freq, fill=histo4)) +
-    geom_bar(stat="identity") + guides(fill=FALSE)+ 
-    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+# ggplot(data=histo5, aes(x=histo4, y=Freq, fill=histo4)) +
+#     geom_bar(stat="identity") + guides(fill=FALSE)+ 
+#     theme(axis.text.x = element_text(angle = 90, hjust = 1))
+# 
+# ggplot(data=histo5_2, aes(x=histo4_2, y=Freq, fill=histo4_2)) +
+#     geom_bar(stat="identity") + guides(fill=FALSE)+ 
+#     theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
-ggplot(data=histo5_2, aes(x=histo4_2, y=Freq, fill=histo4_2)) +
-    geom_bar(stat="identity") + guides(fill=FALSE)+ 
-    theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 
-#Prueba para juntar dos barplot
 
-#df <- cbind.data.frame(histo1, histo1_2[match(histo1$modifications, histo1_2$modifications), ])
-#colnames(df) <- c("PEH", "sequence", "modifications", "bestRank","bestScore","peptideNumberSpectra", "numberProjects","numberClusters","species","projects","PEH.1", "sequence.1", "modifications.1","bestRank.1", "bestScore.1", "peptideNumberSpectra.1", "numberProjects.1", "numberClusters.1" ,  "species.1" , "projects.1")
+df <- cbind.data.frame(histo4_2, histo4[match(histo4_2$modifications.2, histo4$modifications), ])
+colnames(df) <- c("modifications.1","modifications.2")
 
-df <- cbind.data.frame(histo4, histo4_2[match(histo4$modifications, histo4_2$modifications.2), ])
-colnames(dataprueba) <- c("modifications.1","modifications.2")
 
-ggplot(melt(df,measure.vars = names(df)), aes(x = value, fill = variable)) + 
+df2 <- melt(df,measure.vars = names(df))
+
+ggplot((df2), aes(x = value, fill = variable)) + 
     geom_bar(stat = "count", position = "dodge") + 
     theme(axis.text.x = element_text(angle = 20, hjust = 0.5, vjust = -0.1)) + 
-    guides(fill=FALSE)+ 
-    theme(axis.text.x = element_text(angle = 90, hjust = 1))
-    scale_fill_manual(values = c('red', 'blue'))
+    guides(fill=FALSE)+
+    labs("Barplot Release1 vs Release 2") + 
+    xlab("Values")+
+    ylab("Frequency")+
+    theme(text = element_text(size=18), axis.text.x = element_text(angle = 90, hjust = 1, size = 15), axis.text.y=element_text(size = 15))
 
 
-#Comparative table
+### **Frequency table:**
+
+#Comparative table. 
 
 df_freq1 <- data.frame(table(df$modifications.1))
 df_freq2 <- data.frame(table(df$modifications.2))
-colnames(df_freq1) <- c("Modifications.1", "Freq2")
-colnames(df_freq2) <- c("Modifications.2", "Freq2")
+colnames(df_freq1) <- c("Modifications.1", "Frequency")
+colnames(df_freq2) <- c("Modifications.2", "Frequency")
 
 df_freq3 <- cbind.data.frame(df_freq1, df_freq2[match(df_freq1$Modifications.1, df_freq2$Modifications.2), ])
+kable(df_freq3, row.names = FALSE, padding = 0)
 
-edit(df_freq3)
+
 
